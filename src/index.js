@@ -1,17 +1,67 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import React, { useState } from "react";
+import ReactDOM from "react-dom";
+// import { fetchCards } from "./api";
+import "./index.css";
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+// import axios from "axios";
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+import { DeckList, SearchBar, SearchResults } from "./components";
+
+const App = () => {
+  const [results, setResults] = useState([]);
+  const [deck, setDeck] = useState([]);
+
+  const addCardToDeck = ({ id, name }) => {
+    const nextDeck = [...deck]; // make a duplicate first
+    const index = nextDeck.findIndex((card) => card.id === id);
+    if (index > -1) {
+      nextDeck[index].count += 1;
+    } else {
+      nextDeck.push({
+        id,
+        name,
+        count: 1,
+      });
+    }
+
+    setDeck(nextDeck);
+  };
+
+  const removeCardFromDeck = ({ id }) => {
+    const nextDeck = [...deck];
+    const index = nextDeck.findIndex((card) => card.id === id);
+
+    if (index === -1) {
+      // don't do anything if we're trying to remove a card not in the deck
+      return;
+    }
+
+    if (nextDeck[index].count === 1) {
+      // remove the card altogether
+      nextDeck.splice(index, 1);
+    } else {
+      // decrement the count
+      nextDeck[index].count -= 1;
+    }
+
+    setDeck(nextDeck);
+  };
+  return (
+    <div id="app">
+      <SearchBar setResults={setResults} />
+      <SearchResults
+        results={results}
+        addCardToDeck={addCardToDeck}
+        removeCardFromDeck={removeCardFromDeck}
+      />
+
+      <DeckList
+        deck={deck}
+        addCardToDeck={addCardToDeck}
+        removeCardFromDeck={removeCardFromDeck}
+      />
+    </div>
+  );
+};
+
+ReactDOM.render(<App />, document.getElementById("root"));
